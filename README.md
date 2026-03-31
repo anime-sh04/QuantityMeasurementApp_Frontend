@@ -1,2 +1,2 @@
-\# ⭐ QuantityMeasurementApp\_Frontend
+# ⭐ QuantityMeasurementApp_Frontend
 
