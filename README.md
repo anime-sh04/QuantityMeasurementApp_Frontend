@@ -1,2 +1,2 @@
-# ⭐ Dev QuantityMeasurementApp_Frontend
+# ⭐ QuantityMeasurementApp_Frontend
 
