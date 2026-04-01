@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QM — Quantity Measurement</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Literata:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <script src="js/theme.js"></script>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-text">QM</span>
+      <span class="logo-sub">Quantity Measurement</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-label">Pages</span>
+      <button class="nav-item active" id="nav-converter" onclick="goPage('converter')">
+        <span class="nav-icon">⇄</span> Converter
+      </button>
+      <button class="nav-item" id="nav-history" onclick="goPage('history')">
+        <span class="nav-icon">◷</span> History
+      </button>
+
+      <span class="nav-label">Measurement</span>
+      <button class="type-nav-item active" data-type="length" onclick="setType('length')">
+        <span class="type-dot dot-length"></span> Length
+      </button>
+      <button class="type-nav-item" data-type="weight" onclick="setType('weight')">
+        <span class="type-dot dot-weight"></span> Weight
+      </button>
+      <button class="type-nav-item" data-type="volume" onclick="setType('volume')">
+        <span class="type-dot dot-volume"></span> Volume
+      </button>
+      <button class="type-nav-item" data-type="temperature" onclick="setType('temperature')">
+        <span class="type-dot dot-temperature"></span> Temperature
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="theme-btn" onclick="toggleTheme()">
+        <span id="themeIcon">🌙</span>
+        <span id="themeLabel">Dark mode</span>
+      </button>
+      <div id="sidebarAuth"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <span class="topbar-title" id="topbarTitle">Convert a quantity</span>
+      <div class="topbar-right" id="topbarAuth">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('login')">Login</button>
+        <button class="btn btn-primary btn-sm" onclick="openModal('register')">Register</button>
+      </div>
+    </div>
+
+    <div class="op-strip" id="opStrip">
+      <button class="op-strip-tab active" data-op="convert"  onclick="setOp('convert')">⇄ CONVERT</button>
+      <button class="op-strip-tab"        data-op="compare"  onclick="setOp('compare')">=  COMPARE</button>
+      <button class="op-strip-tab"        data-op="add"      onclick="setOp('add')">+  ADD</button>
+      <button class="op-strip-tab"        data-op="subtract" onclick="setOp('subtract')">−  SUBTRACT</button>
+      <button class="op-strip-tab"        data-op="divide"   onclick="setOp('divide')">÷  DIVIDE</button>
+    </div>
+
+    
+    <div class="page active" id="page-converter">
+      <div class="content">
+
+        <!-- CONVERT -->
+        <div id="op-convert" class="split-layout">
+          <div class="form-panel">
+            <div class="panel-title">
+              <span class="panel-title-num">1</span> What are you converting?
+            </div>
+            <div class="stagger-row stagger-row-single">
+              <div class="form-group">
+                <label class="form-label">Value</label>
+                <input class="form-input" type="number" id="cvt-val" placeholder="Enter a number…" style="font-size:1.1rem;padding:14px;" />
+              </div>
+            </div>
+            <div class="stagger-row stagger-row-even">
+              <div class="form-group">
+                <label class="form-label">From unit</label>
+                <select class="form-select" id="cvt-from"></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">To unit</label>
+                <select class="form-select" id="cvt-to"></select>
+              </div>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="doConvert()" id="btn-convert">Convert →</button>
+            </div>
+          </div>
+          <div class="result-panel">
+            <div class="result-card" id="res-convert-card">
+              <div class="result-placeholder">
+                <div class="big-symbol">=</div>
+                <p>Result will appear here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMPARE -->
+        <div id="op-compare" class="split-layout" style="display:none">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-num">A</span> First quantity</div>
+            <div class="stagger-row stagger-row-half">
+              <div class="form-group"><label class="form-label">Value A</label><input class="form-input" type="number" id="cmp-v1" placeholder="0" /></div>
+              <div class="form-group"><label class="form-label">Unit</label><select class="form-select" id="cmp-u1"></select></div>
+            </div>
+            <div class="op-sep"><div class="op-sep-line"></div><div class="op-sep-badge">=</div><div class="op-sep-line"></div></div>
+            <div class="panel-title"><span class="panel-title-num">B</span> Second quantity</div>
+            <div class="stagger-row stagger-row-half">
+              <div class="form-group"><label class="form-label">Value B</label><input class="form-input" type="number" id="cmp-v2" placeholder="0" /></div>
+              <div class="form-group"><label class="form-label">Unit</label><select class="form-select" id="cmp-u2"></select></div>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="doCompare()">Compare →</button>
+            </div>
+          </div>
+          <div class="result-panel">
+            <div class="result-card" id="res-compare-card">
+              <div class="result-placeholder"><div class="big-symbol">≈</div><p>Comparison result here</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADD -->
+        <div id="op-add" class="split-layout" style="display:none">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-num">A</span> First quantity</div>
+            <div class="stagger-row stagger-row-half">
+              <div class="form-group"><label class="form-label">Value A</label><input class="form-input" type="number" id="add-v1" placeholder="0" /></div>
+              <div class="form-group"><label class="form-label">Unit</label><select class="form-select" id="add-u1"></select></div>
+            </div>
+            <div class="op-sep"><div class="op-sep-line"></div><div class="op-sep-badge">+</div><div class="op-sep-line"></div></div>
+            <div class="panel-title"><span class="panel-title-num">B</span> Second quantity</div>
+            <div class="stagger-row stagger-row-half">
+              <div class="form-group"><label class="form-label">Value B</label><input class="form-input" type="number" id="add-v2" placeholder="0" /></div>
+              <div class="form-group"><label class="form-label">Unit</label><select class="form-select" id="add-u2"></select></div>
+            </div>
+            <div class="result-unit-row">
+              <label class="form-label">Result in →</label>
+              <select class="form-select" id="add-target" style="max-width:160px"></select>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="doAdd()">Add →</button>
+            </div>
+          </div>
+          <div class="result-panel">
+            <div class="result-card" id="res-add-card">
+              <div class="result-placeholder"><div class="big-symbol">+</div><p>Sum will appear here</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTRACT -->
+        <div id="op-subtract" class="split-layout" style="display:none">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-num">A</span> First quantity</div>
+            <div class="stagger-row stagger-row-half">
+              <div class="form-group"><label class="form-label">Value A</label><input class="form-input" type="number" id="sub-v1" placeholder="0" /></div>
+              <div class="form-group"><label class="form-label">Unit</label><select class="form-select" id="sub-u1"></select></div>
+            </div>
+            <div class="op-sep"><div class="op-sep-line"></div><div class="op-sep-badge">−</div><div class="op-sep-line"></div></div>
+            <div class="panel-title"><span class="panel-title-num">B</span> Second quantity</div>
+            <div class="stagger-row stagger-row-half">
+              <div class="form-group"><label class="form-label">Value B</label><input class="form-input" type="number" id="sub-v2" placeholder="0" /></div>
+              <div class="form-group"><label class="form-label">Unit</label><select class="form-select" id="sub-u2"></select></div>
+            </div>
+            <div class="result-unit-row">
+              <label class="form-label">Result in →</label>
+              <select class="form-select" id="sub-target" style="max-width:160px"></select>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="doSubtract()">Subtract →</button>
+            </div>
+          </div>
+          <div class="result-panel">
+            <div class="result-card" id="res-subtract-card">
+              <div class="result-placeholder"><div class="big-symbol">−</div><p>Difference will appear here</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIVIDE -->
+        <div id="op-divide" class="split-layout" style="display:none">
+          <div class="form-panel">
+            <div class="panel-title"><span class="panel-title-num">↑</span> Numerator</div>
+            <div class="stagger-row stagger-row-half">
+              <div class="form-group"><label class="form-label">Value</label><input class="form-input" type="number" id="div-v1" placeholder="0" /></div>
+              <div class="form-group"><label class="form-label">Unit</label><select class="form-select" id="div-u1"></select></div>
+            </div>
+            <div class="op-sep"><div class="op-sep-line"></div><div class="op-sep-badge">÷</div><div class="op-sep-line"></div></div>
+            <div class="panel-title"><span class="panel-title-num">↓</span> Denominator</div>
+            <div class="stagger-row stagger-row-half">
+              <div class="form-group"><label class="form-label">Value</label><input class="form-input" type="number" id="div-v2" placeholder="0" /></div>
+              <div class="form-group"><label class="form-label">Unit</label><select class="form-select" id="div-u2"></select></div>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" onclick="doDivide()">Calculate Ratio →</button>
+            </div>
+          </div>
+          <div class="result-panel">
+            <div class="result-card" id="res-divide-card">
+              <div class="result-placeholder"><div class="big-symbol">÷</div><p>Ratio will appear here</p></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── HISTORY PAGE ─── -->
+    <div class="page" id="page-history">
+      <div id="history-gate" class="access-gate" style="display:none">
+        <div class="lock-icon">🔒</div>
+        <h3>Login Required</h3>
+        <p>History is only available to logged-in users.<br>Please sign in to view your calculation history.</p>
+        <button class="btn btn-primary" onclick="openModal('login')">Login to View History</button>
+      </div>
+
+      <div id="history-content">
+        <div class="page-header">
+          <div>
+            <div class="page-h1">History</div>
+            <p class="page-sub">Your recent calculation history</p>
+          </div>
+          <div style="display:flex;gap:8px;" id="historyControls">
+            <button class="btn btn-ghost btn-sm" onclick="loadHistory()">↺ Refresh</button>
+            <button class="btn btn-danger btn-sm" onclick="clearHistory()">✕ Clear All</button>
+          </div>
+        </div>
+
+        <div class="stats-bar">
+          <div class="stat-card">
+            <div class="stat-val" id="stat-total">—</div>
+            <div class="stat-lbl">Total Records</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-last">—</div>
+            <div class="stat-lbl">Last Operation</div>
+          </div>
+        </div>
+
+        <div class="history-filters">
+          <select class="filter-select" id="filterOp" onchange="loadHistory()">
+            <option value="">All Operations</option>
+            <option value="convert">Convert</option>
+            <option value="compare">Compare</option>
+            <option value="add">Add</option>
+            <option value="subtract">Subtract</option>
+            <option value="divide">Divide</option>
+          </select>
+          <select class="filter-select" id="filterType" onchange="loadHistory()">
+            <option value="">All Types</option>
+            <option value="length">Length</option>
+            <option value="weight">Weight</option>
+            <option value="volume">Volume</option>
+            <option value="temperature">Temperature</option>
+          </select>
+        </div>
+
+        <div class="table-wrap" id="historyTable">
+          <div class="empty-state"><div class="icon">⏳</div><p>Loading history…</p></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════ AUTH MODAL ═══════════════ -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Login</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- Login form -->
+      <div id="formLogin">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" />
+        </div>
+        <div class="form-spacer"></div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+        </div>
+        <div class="form-spacer"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doLogin()" id="btnLogin">Login →</button>
+        <div class="divider-text">or</div>
+        <button class="btn-google" onclick="googleLogin()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <div class="auth-switch">No account? <button onclick="switchForm('register')">Register here</button></div>
+      </div>
+
+      <!-- Register form -->
+      <div id="formRegister" style="display:none">
+        <div class="stagger-row stagger-row-even">
+          <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" id="regFirst" placeholder="Alice" /></div>
+          <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" id="regLast" placeholder="Smith" /></div>
+        </div>
+        <div class="form-spacer"></div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="regEmail" placeholder="you@example.com" />
+        </div>
+        <div class="form-spacer"></div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="regPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')doRegister()" />
+        </div>
+        <div class="form-spacer"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doRegister()" id="btnRegister">Create Account →</button>
+        <div class="divider-text">or</div>
+        <button class="btn-google" onclick="googleLogin()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Register with Google
+        </button>
+        <div class="auth-switch">Have an account? <button onclick="switchForm('login')">Login here</button></div>
+      </div>
+
+      <!-- Google One Tap fallback render target -->
+      <div id="g-btn-container" style="margin-top:8px;display:flex;justify-content:center;"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/history.js"></script>
+</body>
+</html>
